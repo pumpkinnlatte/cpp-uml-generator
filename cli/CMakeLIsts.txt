@@ -1,0 +1,11 @@
+add_executable(cppuml_cli
+  src/main.cpp
+  # src/cli_parser.cpp ...
+)
+
+target_link_libraries(cppuml_cli PRIVATE
+  c2uml::core
+)
+
+# Optionally install
+install(TARGETS cppuml_cli RUNTIME DESTINATION bin)
