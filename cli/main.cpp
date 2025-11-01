@@ -1,5 +1,5 @@
 #include <iostream>
-#include "cppuml/model/ClassModel.h"
+#include "model/ClassModel.h"
 
 int main(int argc, char** argv) {
     std::cout << "cpp-to-uml CLI (placeholder)\n";
