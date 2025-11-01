@@ -1,19 +1,19 @@
-# core/CMakeLists.txt
-# core: small modules (model, parser, generator)
-add_subdirectory(model)
-add_subdirectory(parser)
-add_subdirectory(generator)
+# core/CMakeLists.txt (minimal, aggregates sources)
+file(GLOB_RECURSE CORE_SRCS CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc"
+)
+if(NOT CORE_SRCS)
+  message(WARNING "No core sources found in ${CMAKE_CURRENT_SOURCE_DIR}/src; add source files or create stubs.")
+endif()
 
-# Create a normal interface target that aggregates the components
-add_library(c2uml_core INTERFACE)
+add_library(cppuml_core STATIC ${CORE_SRCS})
 
-target_link_libraries(c2uml_core INTERFACE
-  c2uml::model
-  c2uml::parser
-  c2uml::generator
+target_include_directories(cppuml_core
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Provide a namespaced alias for consumers
-add_library(c2uml::core ALIAS c2uml_core)
+target_compile_features(cppuml_core PUBLIC cxx_std_17)
 
-# API compatibility note: keep core headers Qt-free so core can be used in CLI/tests without Qt.
+add_library(cppuml::core ALIAS cppuml_core)
