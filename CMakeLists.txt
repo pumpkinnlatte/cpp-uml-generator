@@ -79,8 +79,16 @@ if(BUILD_UI)
   add_subdirectory(ui)
 endif()
 
-# Tests are optional and must call enable_testing() in this scope
+# ---- Catch2-powered Test Integration ----
 if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(test)
+  # Fetch and enable Catch2 only when building tests (keeps build clean for normal use)
+  include(FetchContent)
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        v3.5.2 # Or latest stable, adjust as needed
+  )
+  FetchContent_MakeAvailable(Catch2)
+
+  add_subdirectory(test) # Your test/CMakeLists.txt will use Catch2 for runner and test discovery
 endif()
