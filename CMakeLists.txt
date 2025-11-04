@@ -1,3 +1,4 @@
+#Roor CMakeLists.txt
 cmake_minimum_required(VERSION 3.16)
 project(cpp_uml_generator VERSION 0.1.0 LANGUAGES CXX)
 
@@ -79,16 +80,18 @@ if(BUILD_UI)
   add_subdirectory(ui)
 endif()
 
-# ---- Catch2-powered Test Integration ----
-if(BUILD_TESTS)
-  # Fetch and enable Catch2 only when building tests (keeps build clean for normal use)
+# --- Unit Tests ---
+if (BUILD_TESTS)
+  enable_testing()
+
+  # Si Catch2 no está instalado, usar FetchContent para traerlo automáticamente
   include(FetchContent)
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.5.2 # Or latest stable, adjust as needed
+    GIT_TAG v3.5.3  # versión estable
   )
   FetchContent_MakeAvailable(Catch2)
 
-  add_subdirectory(test) # Your test/CMakeLists.txt will use Catch2 for runner and test discovery
+  add_subdirectory(test)
 endif()

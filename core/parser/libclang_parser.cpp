@@ -147,7 +147,8 @@ static CXChildVisitResult visitor(CXCursor cursor, CXCursor parent, CXClientData
 
         // Template parameter detection for methods
         if (k == CXCursor_FunctionTemplate) {
-            extractTemplateParameters(cursor, m.returnType.templateArgs); // You could add more struct members for template params.
+            extractTemplateParameters(cursor, m.templateParams);
+            m.isTemplate = !m.templateParams.empty();
         }
 
         int numArgs = clang_Cursor_getNumArguments(cursor);
