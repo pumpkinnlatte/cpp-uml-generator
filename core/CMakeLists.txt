@@ -1,34 +1,66 @@
 # core/CMakeLists.txt
+#
+# Defines the 'core_lib' library, which contains all primary
+# application logic: parsing (libclang), the internal data model,
+# and diagram exporters (PlantUML).
+#
+# This library is the "core" of the application and is consumed by
+# the 'cli', 'ui', and 'test' targets.
+#
 
-# Crear la biblioteca 'core'
+# --- Core Library Target ---
+#
+# This target aggregates all source files for the library.
+# Note: Model headers are listed here. If they are truly header-only,
+# they are consumed by consumers via target_include_directories.
+# If they have matching .cpp files, add those .cpp files here as well.
 add_library(core_lib
-    # Fuentes del Parser
+    # Parser implementation (wraps libclang)
     parser/libclang_parser.cpp
-    
-    # Fuentes del Exporter
-    exporter/PlantUmlExporter.cpp
+    parser/libclang_parser.h
 
-    # Fuentes del Modelo (añada aquí los .cpp si los crea)
-    # model/Class.cpp
-    # ...
+    # Internal data model
+    model/Class.h
+    model/Field.h
+    model/Method.h
+    model/Namespace.h
+    model/TranslationUnit.h
+    model/TranslationUnit.h
+
+    # Exporter implementation
+    exporter/PlantUmlExporter.cpp
+    exporter/PlantUmlExporter.h
 )
 
-# Definir la API pública (cabeceras)
+# --- Public Include Interface ---
+#
 target_include_directories(core_lib
     PUBLIC
-        # Esto permite que otros objetivos (cli, test) hagan #include "model/Class.h"
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
-# Enlazar el núcleo con libclang usando el objetivo importado
-# Esto maneja automáticamente los includes y las bibliotecas.
+# --- Include Dependencies ---
+#
+# These are include paths required *only* to compile 'core_lib.cpp' files.
+# They will *not* be propagated to consumers.
+
+target_include_directories(core_lib
+    PRIVATE
+        ${LLVM_INCLUDE_DIRS} # This variable was set by find_package(LLVM) in the root
+)
+
+# --- Link Core LLVM/Clang Libraries ---
+#
+llvm_map_components_to_libnames(CORE_LLVM_LIBS
+    clang-c  # The C API for libclang
+    Support  # A core LLVM dependency required by libclang
+)
+
+# 'PRIVATE' because consumers of 'core_lib' are fully
+# insulated from its internal LLVM dependencies.
 target_link_libraries(core_lib
-    PUBLIC
-        # Usamos PUBLIC porque nuestra API (ej. libclang_parser.h)
-        # podría exponer tipos de datos de libclang (como CXCursor)
-        LLVM::clang-c
-        LLVM::Support
+    PRIVATE
+        ${CORE_LLVM_LIBS}
 )
 
-# Asegurar el estándar C++
-target_compile_features(core_lib PRIVATE cxx_std_17)
+target_compile_features(core_lib PUBLIC cxx_std_17)

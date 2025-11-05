@@ -1,79 +1,94 @@
-cmake_minimum_required(VERSION 3.18) # Subido a 3.18 por compatibilidad de FetchContent mejorada
+# [project root]/CMakeLists.txt
+
+#
+# CppUMLGenerator Root CMake Configuration
+#
+# This file manages project-wide settings, locates top-level dependencies,
+# and orchestrates the build by including the subdirectories for the
+# core library, CLI, UI, and tests.
+#
+
+cmake_minimum_required(VERSION 3.18) # Raised to 3.18 for improved FetchContent compatibility
 project(CppUMLGenerator VERSION 0.1.0 LANGUAGES CXX C)
 
-# --- Configuración Básica del Compilador ---
+# --- Compiler and Build Standards ---
+#
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # genera compile_commands.json para IDEs
+set(CMAKE_CXX_EXTENSIONS OFF)         # Disables GNU extensions (e.g., -std=gnu++17) for better portability
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # Required for shared libraries, good practice for static ones
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generates compile_commands.json for IDEs and tools (clangd, etc.)
 
-# --- Opciones del Proyecto ---
-# Agrupadas para visibilidad
+# --- Project Options ---
+#
 option(BUILD_UI "Build Qt UI" ON)
 option(BUILD_TESTS "Build unit tests" ON)
 
-# --- Prevención de Compilación "In-Source" ---
+# --- Build Configuration ---
+#
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not supported. Run: cmake -S . -B build")
 endif()
 
-# --- Detección de Dependencias Principales (libclang) ---
+# --- Core Dependency: LLVM/Clang ---
 #
+# Locate the LLVM/Clang 18.1.3+ libraries.
 #
 message(STATUS "Looking for LLVM/Clang 18.1.3 or newer...")
 
-find_package(LLVM 18.1.3 # <--- ¡Este es el requisito MÍNIMO!
-    REQUIRED
-    COMPONENTS
-        clang-c # La API C de libclang (Index.h)
-        Support # Librería de soporte de LLVM
-    CONFIG      # Usar el modo de configuración moderno
+find_package(LLVM 18.1.3
+    REQUIRED  # Fail configuration if LLVM is not found
+    CONFIG    # Use LLVMConfig.cmake (modern)
+    # NOTE: Components are *not* requested here.
+    # Sub-projects (i.e., core_lib) are responsible for mapping the
+    # specific components they need (e.g., 'clang-c', 'Support')
+    # using llvm_map_components_to_libnames(). This is more modular.
 )
 
-# Si se encuentra, imprime las rutas (útil para depuración)
+# User Feedback on the located LLVM installation.
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION} (at ${LLVM_CMAKE_DIR})")
 message(STATUS "LLVM include dirs: ${LLVM_INCLUDE_DIRS}")
 
 #
-# === NOTA PARA EL USUARIO FINAL ===
-# Si CMake no encuentra LLVM, el usuario puede especificar la ruta
-# en el comando de cmake, NO editando este archivo.
+# === User Note ===
 #
-# Ejemplo:
+# If CMake doesnt finds LLVM, the route can be specified on the cmake command.
+# DO NOT EDIT THE FILE
+#
+# Example:
 # cmake -S . -B build -DLLVM_DIR=/usr/lib/llvm-18/lib/cmake/llvm
 #
-# Esto es infinitamente más flexible que nuestra lógica anterior.
+
+# --- Test Dependencies ---
 #
-
-# --- Dependencias de Pruebas (Catch2) ---
+# Configure test dependencies only if tests are enabled.
+# We use the modern FetchContent module to acquire Catch2.
+#
 if (BUILD_TESTS)
-  enable_testing()
+  enable_testing() # Enables CTest
 
-  # Si Catch2 no está instalado, usar FetchContent para traerlo automáticamente
+  # Ensure the FetchContent module is available
   include(FetchContent)
+
+  # DECLARE the dependency. This does *not* download it.
+  # The 'test/CMakeLists.txt' file will call FetchContent_MakeAvailable(Catch2),
+  # which will trigger the download only if BUILD_TESTS is ON.
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.5.3  # versión estable
+    GIT_TAG v3.5.3  # Pin to a specific, stable version
   )
-  # No llame a MakeAvailable aquí, hágalo en test/CMakeLists.txt
-  # para mantener las variables de Catch2 locales a ese subdirectorio.
-  FetchContent_GetProperties(Catch2)
-  if(NOT Catch2_POPULATED)
-    FetchContent_Populate(Catch2)
-  endif()
-
-  set(CATCH2_INCLUDE_DIR ${catch2_SOURCE_DIR}/src)
 endif()
 
+# --- Project Structure ---
+#
+# Add the primary components of the application.
+# The 'core' and 'cli' targets are mandatory.
+#
+add_subdirectory(core)   # Defines the 'core_lib' library
+add_subdirectory(cli)    # Defines the 'cli_app' executable
 
-# --- Subdirectorios del Proyecto ---
-# Estos CMakeLists.txt deben ser ahora más simples
-
-add_subdirectory(core)   # define la biblioteca 'core_lib'
-add_subdirectory(cli)    # define el ejecutable 'cli_app'
-
+# Conditionally add optional components based on the build options.
 if(BUILD_UI)
   add_subdirectory(ui)
 endif()
