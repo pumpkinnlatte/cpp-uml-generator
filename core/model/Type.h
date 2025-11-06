@@ -10,7 +10,6 @@
 
 namespace cppuml {
 
-// Declaración anticipada para la relación de amistad 
 class LibclangParser; 
 
 /**
