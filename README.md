@@ -65,7 +65,7 @@ cmake -S . -B build -DBUILD_UI=ON -DBUILD_TESTS=ON
 cmake --build build -- -j$(nproc)
 ```
 
-## Running Tests
+### 4. Running Tests
 
 If the project was configured with `-DBUILD_TESTS=ON`, you can run the tests using CTest:
 
@@ -98,3 +98,9 @@ You can customize the build by passing these variables to CMake:
 cmake -S . -B build -DBUILD_UI=OFF -DBUILD_TESTS=OFF
 cmake --build build
 ```
+
+## Current Project Status
+
+- This project is under active development.  
+- The current work focuses on completing Phases I and II of this roadmap to achieve the Minimum Viable Product (MVP).  
+- The MVP objective is: To produce a tool capable of analyzing a small or medium-sized C++ project, generating a readable PlantUML diagram, and displaying it within the Qt application with export options.
