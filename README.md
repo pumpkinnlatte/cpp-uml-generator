@@ -1,90 +1,100 @@
-# cpp-uml-generator
+# Cpp-UML-Generator
 
-A lightweight tool to generate UML class diagrams from C++ source.  
+
+`Cpp-UML-Generator` is a visualization tool for C++. It is designed to parse C++ projects and generate UML class diagrams to aid in code comprehension, documentation, and refactoring.
+
+This project uses **libclang** to parse a full Abstract Syntax Tree (AST). This allows a semantic analysis of the C++ code, resulting in accurate UML representation that correctly handles namespaces, inheritance, and member visibility.
+
+The parsed code model is then exported to the **PlantUML** format, enabling the generation of clear and maintainable class diagrams.
+
+
+
+## Key Features
+
+* **Robust Parsing:** Uses `libclang` for accurate syntactic and semantic analysis of C++ code (including C++17/20).
+* **PlantUML Output:** Generates class diagrams in the human-readable PlantUML (`.puml`) format.
 
 ## Table of Contents
-- [Quickstart](#quickstart)
-- [Requirements](#requirements)
-- [Build (recommended)](#build-recommended)
-- [Build script (build.sh)](#build-script-buildsh)
-- [Run (CLI / UI)](#run-cli--ui)
-- [Tests](#tests)
-- [Project layout](#project-layout)
-- [CMake options](#cmake-options)
 
-## Quickstart
-1. **Clone**:
-   ```bash
-   git clone https://github.com/pumpkinnlatte/cpp-uml-generator.git
-   cd cpp-uml-generator
-   ```
+* [Installation and Building (Quickstart)](#installation-and-building-quickstart)
+* [Running (CLI / UI)](#running-cli--ui)
+* [Running Tests](#running-tests)
+* [Project Details](#project-details)
 
-2. **Install minimal dependencies** (Ubuntu/Debian example):
-   ```bash
-   sudo apt update
-   sudo apt install -y build-essential cmake pkg-config git ca-certificates curl
-   # Qt6 development package — name may vary by distro:
-   sudo apt install -y qt6-base-dev
-   ```
+## Installation and Building (Quickstart)
 
-3. **Build and test using the helper script**:
-   ```bash
-   ./build.sh                # default: BUILD_UI=ON, BUILD_TESTS=ON
-   ```
+### Requirements
 
-   Alternatively, **manual configure + build**:
-   ```bash
-   cmake -S . -B build -DBUILD_UI=ON -DBUILD_TESTS=ON
-   cmake --build build -- -j$(nproc)
-   ctest --test-dir build --output-on-failure
-   ```
+* Build tools: `build-essential`, `cmake`, `pkg-config`, `git`, `ca-certificates`, `curl`.
+* Qt 6: `qt6-base-dev` (or the equivalent development package for your distribution).
+* LLVM/Clang 12+ (for `libclang`) - 
 
-## Requirements
-- Build-essential tools: `build-essential`, `cmake`, `pkg-config`, `git`, `ca-certificates`, `curl`.
-- Qt6: `qt6-base-dev` (or equivalent for your distribution).
+### 1. Clone the Repository
 
-## Build script (build.sh)
-A helper script automates configure → build → test.  
-
-**Useful options**:
-- `--no-ui`: Disable building the Qt UI.
-- `--no-tests`: Disable unit tests.
-- `--clean`: Remove `build/` and caches before configuring.
-- `--install-deps`: Try to install deps (Ubuntu/Debian).
-- `--jobs N`: Parallel jobs.
-- `--run-cli`: Run CLI after successful build.
-
-## Run (CLI / UI)
-- **CLI**:
-  ```bash
-  ./build/cli/cppuml_cli
-  ```
-
-- **UI** (if built with UI enabled):
-  ```bash
-  ./build/ui/cppuml_ui
-  ```
-
-## Tests
-- **Run tests**:
-  ```bash
-  ctest --test-dir build --output-on-failure
-  ```
-
-## Project layout
-- `CMakeLists.txt` — Top-level configuration and options.
-- `core/` — Core library: parser, model, export.
-- `cli/` — CLI executable.
-- `ui/` — Qt (Widgets) application.
-- `test/` — Tests and CMake configuration for tests.
-- `build.sh` — Build helper script.
-- `.github/workflows/` — CI configuration (build + tests).
-
-## CMake options
-- `BUILD_UI` (ON/OFF) — Build Qt UI.
-- `BUILD_TESTS` (ON/OFF) — Enable/disable tests.
-
-**Example**:
 ```bash
-cmake -S . -B build -DBUILD_UI=OFF -DBUILD_TESTS=ON
+git clone [https://github.com/pumpkinnlatte/cpp-uml-generator.git](https://github.com/pumpkinnlatte/cpp-uml-generator.git)
+cd cpp-uml-generator
+```
+
+### 2\. Build (Option A: Helper Script)
+
+The `build.sh` script automates the configure, build, and (optionally) test steps.
+
+```bash
+./build.sh
+```
+
+**Useful script options:**
+
+  * `--no-ui`: Disable building the Qt GUI.
+  * `--no-tests`: Disable building unit tests.
+  * `--clean`: Remove the `build/` directory before configuring.
+  * `--install-deps`: Try to install dependencies (Ubuntu/Debian).
+  * `--jobs N`: Specify the number of parallel jobs (e.g., `--jobs $(nproc)`).
+  * `--run-cli`: Run the CLI after a successful build.
+
+### 3\. Build (Option B: Manual CMake)
+
+You can configure and build the project manually:
+
+```bash
+# Configure the project (enabling UI and Tests)
+cmake -S . -B build -DBUILD_UI=ON -DBUILD_TESTS=ON
+
+# Build
+cmake --build build -- -j$(nproc)
+```
+
+## Running Tests
+
+If the project was configured with `-DBUILD_TESTS=ON`, you can run the tests using CTest:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+## Project Details
+
+### Project Structure
+
+  * `CMakeLists.txt`: Main CMake configuration and options.
+  * `core/`: Core library (`libcppuml`): parser, data model, and exporters.
+  * `cli/`: Command-line interface executable.
+  * `ui/`: GUI application (Qt Widgets).
+  * `test/`: Unit and integration tests.
+  * `build.sh`: Build helper script.
+  * `.github/workflows/`: Continuous Integration (CI) configuration.
+
+### CMake Options
+
+You can customize the build by passing these variables to CMake:
+
+  * `BUILD_UI` (ON/OFF): Build the Qt GUI application. (Default: ON)
+  * `BUILD_TESTS` (ON/OFF): Enable building the tests. (Default: ON)
+
+**Example (minimal CLI-only build):**
+
+```bash
+cmake -S . -B build -DBUILD_UI=OFF -DBUILD_TESTS=OFF
+cmake --build build
 ```
