@@ -14,10 +14,7 @@ namespace cppuml {
 class LibclangParser; 
 
 /**
- * @brief Modela un tipo de C++ de forma semántica, no solo como una cadena.
- *
- * Esta clase es fundamental para el Lineamiento 5 (Type es un Objeto de 1ra Clase)
- * y el Lineamiento 3 (enlace a través de punteros no propietarios).
+ * @brief Modela un tipo de C++ de forma semántica.
  *
  * Es un "Objeto de Valor": es copiable y no hereda de Element.
  * Un Field o Method contendrá un Type por valor.
@@ -57,7 +54,7 @@ public:
     void setReference(bool val = true) { m_isReference = val; }
     bool isReference() const { return m_isReference; }
 
-    // --- Enlace del Modelo (Lineamiento P3) ---
+    // --- Enlace del Modelo ---
 
     /**
      * @brief Establece el enlace a la definición del elemento (si es un tipo de usuario).
@@ -71,7 +68,7 @@ public:
      */
     Element* getCustomTypeElement() const { return m_customTypeElement; }
 
-    // --- Plantillas (Lineamiento P5) ---
+    // --- Plantillas ---
 
     /**
      * @brief Añade un parámetro de plantilla a este tipo.
@@ -117,7 +114,7 @@ public:
 
 private:
     std::string m_name;
-    Element* m_customTypeElement; // Puntero no propietario (Lineamiento P3)
+    Element* m_customTypeElement; // Puntero no propietario
 
     std::vector<Type> m_templateParameters;
 

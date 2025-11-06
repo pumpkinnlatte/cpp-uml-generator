@@ -10,9 +10,9 @@
 namespace cppuml {
 
 /**
- * @brief Modela un miembro de datos (campo) dentro de una Clase o Struct.
+ * @brief Modela un miembro de datos dentro de una Clase o Struct.
  *
- * Hereda de Element (tiene nombre y visibilidad) y contiene un Type.
+ * Hereda de Element y contiene un Type.
  */
 class Field : public Element {
 public:
